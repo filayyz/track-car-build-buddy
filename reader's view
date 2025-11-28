@@ -1,0 +1,235 @@
+import openai
+
+OPENAI_API_KEY="Bruh"
+
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+openai.api_key = os.getenv("openai_trackcar_blueprint_buddy")
+
+#!/usr/bin/env python3
+"""
+track_mods_costs.py
+
+Track-focused mod recommendations with premium + budget options,
+including estimated total costs for each category based on real-world pricing.
+"""
+
+from typing import Dict, List
+
+
+CAR_TRACK_MODS = {
+
+    "2025 BMW M2": {
+        "Suspension": {
+            "Premium": [
+                "KW Variant 3 Coilovers",
+                "Bilstein B16 DampTronic",
+                "Fall-Line Camber Plates",
+            ],
+            "Budget": [
+                "BC Racing BR Series Coilovers",
+                "Megan Racing EZ Street Coilovers",
+                "SuperPro Camber Bushings",
+            ],
+            "Cost": {
+                "Premium": 4500,   # realistic total cost
+                "Budget": 1600,
+            },
+        },
+
+        "Brakes": {
+            "Premium": [
+                "AP Racing Radi-CAL Big Brake Kit",
+                "Brembo GT Kit",
+                "PFC Race Pads",
+                "Goodridge Steel Lines",
+                "Castrol SRF Fluid",
+            ],
+            "Budget": [
+                "PowerStop Track Day Pads",
+                "EBC YellowStuff Pads",
+                "StopTech Steel Lines",
+                "Motul RBF600 Fluid",
+            ],
+            "Cost": {
+                "Premium": 7500,
+                "Budget": 700,
+            },
+        },
+
+        "Tires & Wheels": {
+            "Premium": [
+                "Michelin Cup 2 or Cup 2 R Tires",
+                "Apex EC-7R Forged Wheels",
+            ],
+            "Budget": [
+                "Falken RT660 Tires",
+                "Apex ARC-8 Flow Formed Wheels",
+            ],
+            "Cost": {
+                "Premium": 5200,
+                "Budget": 2300,
+            },
+        },
+
+        "Engine & Powertrain": {
+            "Premium": [
+                "Eventuri Carbon Intake",
+                "Akrapovic Titanium Exhaust",
+                "MHD or Bootmod3 Tune",
+                "CSF Heat Exchanger",
+            ],
+            "Budget": [
+                "K&N Panel Filter",
+                "VRSF Exhaust",
+                "Bootmod3 OTS Tune",
+                "Mishimoto Intercooler",
+            ],
+            "Cost": {
+                "Premium": 8800,
+                "Budget": 2400,
+            },
+        },
+
+        "Drivetrain": {
+            "Premium": [
+                "Rogue Engineering Short Shift Kit",
+                "Dinan LSD",
+                "Spec Stage 2+ Clutch",
+            ],
+            "Budget": [
+                "RTD Short Shifter",
+                "MFactory LSD",
+                "ACT Clutch Kit",
+            ],
+            "Cost": {
+                "Premium": 6500,
+                "Budget": 2200,
+            },
+        },
+
+        "Aero & Cooling": {
+            "Premium": [
+                "M Performance Carbon Splitter",
+                "APR GTC-300 Wing",
+                "Verus Brake Cooling Kit",
+                "Fall-Line Diffuser",
+            ],
+            "Budget": [
+                "Maxton Splitter",
+                "ModeCarbon Ducktail Spoiler",
+                "Universal Brake Cooling Kit",
+            ],
+            "Cost": {
+                "Premium": 9000,
+                "Budget": 1200,
+            },
+        },
+
+        "Safety": {
+            "Premium": [
+                "Recaro Pole Position",
+                "Sparco EVO QRT",
+                "Schroth Profi II Harness",
+                "Studio RSR Half Cage",
+            ],
+            "Budget": [
+                "Sparco Sprint Seat",
+                "OMP TRS-E Seat",
+                "G-Force Harness",
+            ],
+            "Cost": {
+                "Premium": 7500,
+                "Budget": 1800,
+            },
+        },
+    },
+
+    # ----- GENERIC OPTION FOR ALL OTHER CARS -----
+    "generic": {
+        "Suspension": {
+            "Premium": ["KW V3", "Bilstein B16"],
+            "Budget": ["BC BR Series", "Megan Racing EZ Street"],
+            "Cost": {"Premium": 3500, "Budget": 1100},
+        },
+        "Brakes": {
+            "Premium": ["AP Racing BBK", "Brembo GT"],
+            "Budget": ["PowerStop Pads", "Motul RBF600"],
+            "Cost": {"Premium": 6000, "Budget": 500},
+        },
+        "Tires & Wheels": {
+            "Premium": ["Michelin Cup 2", "Apex Forged"],
+            "Budget": ["Falken RT660", "Apex ARC-8"],
+            "Cost": {"Premium": 4500, "Budget": 1800},
+        },
+        "Engine": {
+            "Premium": ["Eventuri Intake", "Akrapovic Exhaust"],
+            "Budget": ["K&N Intake", "Borla Exhaust"],
+            "Cost": {"Premium": 6500, "Budget": 1200},
+        },
+        "Aero & Cooling": {
+            "Premium": ["APR Wing", "Verus Aero"],
+            "Budget": ["Maxton Splitter", "Cooling Ducts"],
+            "Cost": {"Premium": 5000, "Budget": 800},
+        },
+        "Safety": {
+            "Premium": ["Recaro Seat", "Schroth Harness"],
+            "Budget": ["OMP Budget Seat", "G-Force Harness"],
+            "Cost": {"Premium": 4000, "Budget": 900},
+        },
+    }
+}
+
+
+CAR_COMPETITION_COMMENTS = {
+    "2025 BMW M2": (
+        "The 2025 BMW M2 competes with the Porsche Cayman S, RS3, and Toyota GR Supra. "
+        "It has the strongest tuning potential in the segment, and with suspension, brake, "
+        "and cooling upgrades it becomes extremely competitive at track days. Its RWD layout "
+        "and manual option give it an enthusiast edge."
+    ),
+    "generic": (
+        "This vehicle, with the right modifications, can compete well with other sports cars "
+        "in its class. Premium upgrades bring it close to factory track-oriented models, while "
+        "budget options still offer strong improvements for occasional track use."
+    )
+}
+
+
+def get_track_mods_for_model(model: str):
+    return CAR_TRACK_MODS.get(model, CAR_TRACK_MODS["generic"])
+
+
+def get_competition_comment(model: str) -> str:
+    return CAR_COMPETITION_COMMENTS.get(model, CAR_COMPETITION_COMMENTS["generic"])
+
+
+def print_track_mods_and_comparison(model: str):
+    print(f"\nTrack-focused modification suggestions for **{model}**:\n")
+
+    mods = get_track_mods_for_model(model)
+
+    for category, data in mods.items():
+        print(f"== {category} ==")
+
+        print("  Premium Options:")
+        for item in data["Premium"]:
+            print(f"    • {item}")
+
+        print("  Budget Options:")
+        for item in data["Budget"]:
+            print(f"    • {item}")
+
+        print(f"  Estimated Premium Total Cost: ${data['Cost']['Premium']:,}")
+        print(f"  Estimated Budget Total Cost:  ${data['Cost']['Budget']:,}")
+        print()
+
+    print("Competition / class comparison:")
+    print("  " + get_competition_comment(model))
+
+
+if __name__ == "__main__":
+    user_model = input("Enter your car model (e.g. '2025 BMW M2'): ").strip()
+    print_track_mods_and_comparison(user_model)
